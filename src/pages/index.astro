@@ -159,8 +159,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       // ACTIVITY STARTER
-      // Builds one text-only results row. Extend it with a percentage bar.
-      // Use the selection and leader values to distinguish relevant rows.
+      // Builds one results row with a percentage bar and selection and leader labels.
       function buildResultRow(
         choice: Choice,
         count: number,
@@ -180,12 +179,21 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
             ? " — tied for most popular"
             : "";
 
+        const selectedSuffix = isSelected ? " — your pick" : "";
+
         li.innerHTML = `
           <div class="results-row-head">
-            <span>${choice.label}${leaderSuffix}</span>
+            <span>${choice.label}${leaderSuffix}${selectedSuffix}</span>
             <span>${count} response${count === 1 ? "" : "s"} (${percent}%)</span>
           </div>
+          <div class="results-bar-track" aria-hidden="true">
+            <div class="results-bar-fill"></div>
+          </div>
         `;
+
+        const barFill = li.querySelector<HTMLDivElement>(".results-bar-fill")!;
+        barFill.style.width = `${percent}%`;
+        barFill.style.backgroundColor = choice.accentColor;
         return li;
       }
 
@@ -619,12 +627,41 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
     </style>
 
     <style is:global>
-      /*
-        DYNAMIC RESULTS STYLES
+      .results-row {
+        display: grid;
+        gap: 0.5rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.5rem;
+      }
 
-        Add styles for markup created by buildResultRow() here. This global block
-        allows the styles to reach elements created by the client-side script.
-      */
+      .results-row-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+      }
+
+      .results-row[data-selected="true"] {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .results-row[data-leader="sole"],
+      .results-row[data-leader="tied"] {
+        outline: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .results-bar-track {
+        width: 100%;
+        height: 0.5rem;
+        overflow: hidden;
+        background: #171717;
+        border-radius: 999px;
+      }
+
+      .results-bar-fill {
+        height: 100%;
+        border-radius: inherit;
+      }
     </style>
   </body>
 </html>
